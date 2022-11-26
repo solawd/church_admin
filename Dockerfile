@@ -12,6 +12,7 @@ WORKDIR /code
 # Install dependencies
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
+RUN mkdir -p /staticfiles
 
 # Copy project
 COPY . .
