@@ -152,4 +152,4 @@ STATICFILES_DIRS = (
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'members.CustomUser'
 
-CSRF_TRUSTED_ORIGINS=["localhost", "neci-admin-5r7yg.ondigitalocean.app"]
+CSRF_TRUSTED_ORIGINS=["localhost", "neci-admin-5r7yg.ondigitalocean.app" ]
