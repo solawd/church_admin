@@ -30,8 +30,6 @@ if 'SECRET_KEY' in os.environ:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = IS_PROD
 
-ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
