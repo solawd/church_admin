@@ -90,11 +90,8 @@ DATABASES = {
 MAX_CONN_AGE = 600
 if "DATABASE_URL" in os.environ:
     # Configure Django for DATABASE_URL environment variable.
+    print("DATABASE URL: " + str(os.environ.get("DATABASE_URL")))
     DATABASES["default"] = dj_database_url.parse(os.environ.get("DATABASE_URL"))
-
-    # Enable test database if found in CI environment.
-    if "CI" in os.environ:
-        DATABASES["default"]["TEST"] = DATABASES["default"]
 
 
 ADMINS = (
