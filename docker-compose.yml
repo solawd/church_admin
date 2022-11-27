@@ -10,7 +10,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
     command: /code/runserver.sh
     volumes:
       - .:/code
