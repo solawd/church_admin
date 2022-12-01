@@ -6,4 +6,4 @@
 __pycache__
 venv
 staticfiles
-db.sqlite*
+db.sqlite3
