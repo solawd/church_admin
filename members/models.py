@@ -71,6 +71,7 @@ class FollowUpEvent(models.Model):
 class AttendanceRegister(models.Model):
     date_taken = models.DateField(default=datetime.date.today)
     attendance_type = models.CharField(max_length=48, choices=ATTENDANCE_TYPES, default='SUNDAY SERVICE')
+    is_already_synched = models.BooleanField(default=False, null=True, blank=True, editable=False)
 
     def __str__(self):
         return f'[ {self.attendance_type} : {self.date_taken} ]'
