@@ -107,6 +107,11 @@ class AttendanceRegisterModelAdmin(admin.ModelAdmin):
 
     def response_add(self, request, obj, post_url_continue=None):
         from members.biz_functions import get_present_and_absent_members
+
+        if obj.is_already_synched:
+            # register already synched, return to prevent future members from being marked absent
+            return super().response_add(request, obj, post_url_continue)
+
         _, absent_members = get_present_and_absent_members(obj)
         attendance_items = []
         for member in absent_members:
@@ -114,6 +119,7 @@ class AttendanceRegisterModelAdmin(admin.ModelAdmin):
             attendance_items.append(attendance)
 
         MemberAttendance.objects.bulk_create(attendance_items)
+        obj.is_already_synched = True
         return super().response_add(request, obj, post_url_continue)
 
 
