@@ -108,6 +108,7 @@ def generate_multiple_attendance_pdfs(attendance_registers: [AttendanceRegister]
         flowables.append(document_title)
         flowables.append(h_line)
         present_members, absent_members = get_present_and_absent_members_for_report(attendance_register)
+        visitors_count = len([member for member in present_members if member.member_status == 'VISITOR'])
         present_title = Paragraph(f'<br/><br/>[ Members Present ] <br/><br/>', style=heading_style)
         flowables.append(present_title)
         present_members_data = []
@@ -140,7 +141,9 @@ def generate_multiple_attendance_pdfs(attendance_registers: [AttendanceRegister]
 
         # Summary Section
         summary_title = Paragraph('<br/><br/><br/>Attendance Summary <br/><br/>', style=heading_style)
-        summary_body = Paragraph(f'<br/>Number Present : {len(present_members)}<br/><br/>Number Absent: {len(absent_members)}<br/>', style=heading_style)
+        summary_body = Paragraph(f"""<br/>Members Present : {len(present_members)}<br/><br/>
+                                Members Absent: {len(absent_members)}<br/><br/>
+                                Visitors Present: {visitors_count}""", style=heading_style)
         flowables.append(summary_title)
         flowables.append(h_line)
         flowables.append(summary_body)
