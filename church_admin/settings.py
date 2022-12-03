@@ -28,7 +28,7 @@ if 'SECRET_KEY' in os.environ:
     SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = IS_PROD
 
 ALLOWED_HOSTS = ['*']
 
