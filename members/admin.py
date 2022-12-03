@@ -105,6 +105,17 @@ class AttendanceRegisterModelAdmin(admin.ModelAdmin):
     fields = ('date_taken', 'attendance_type')
     actions = (export_registers_to_pdf, )
 
+    def response_add(self, request, obj, post_url_continue=None):
+        from members.biz_functions import get_present_and_absent_members
+        _, absent_members = get_present_and_absent_members(obj)
+        attendance_items = []
+        for member in absent_members:
+            attendance = MemberAttendance(member_id=member['id'], is_present=False, register=obj)
+            attendance_items.append(attendance)
+
+        MemberAttendance.objects.bulk_create(attendance_items)
+        return super().response_add(request, obj, post_url_continue)
+
 
 @admin.register(ChurchMember)
 class ChurchMemberModelAdmin(admin.ModelAdmin):

@@ -1,10 +1,10 @@
 import datetime
 import io
-from .models import AttendanceRegister, ChurchMember
-from reportlab.lib import colors, styles
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from .models import AttendanceRegister
+from reportlab.lib import colors
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, PageBreak, HRFlowable
 
 
 def generate_attendance_pdf(attendance_register: AttendanceRegister, buffer: io.BytesIO,
@@ -25,6 +25,9 @@ def generate_attendance_pdf(attendance_register: AttendanceRegister, buffer: io.
         fontSize=14,
         leading=14,
     )
+    h_line = HRFlowable(width="80%", thickness=1, lineCap='round',
+                        color='lightgrey', spaceBefore=1, spaceAfter=1,
+                        hAlign='CENTER', vAlign='BOTTOM', dash=None)
     heading_style = ParagraphStyle(
         name='title',
         fontSize=12,
@@ -33,6 +36,7 @@ def generate_attendance_pdf(attendance_register: AttendanceRegister, buffer: io.
     title = f"<br/><br/>Attendance Register : {attendance_register.attendance_type} {attendance_register.date_taken.strftime('%d-%m-%Y')} <br/><br/>"
     document_title = Paragraph(title, style=title_style)
     flowables.append(document_title)
+    flowables.append(h_line)
 
     # Present Members
     present_title = Paragraph(f'<br/><br/>[ Members Present ] <br/><br/>', style=heading_style)
@@ -72,7 +76,7 @@ def generate_attendance_pdf(attendance_register: AttendanceRegister, buffer: io.
 
 
 def generate_multiple_attendance_pdfs(attendance_registers: [AttendanceRegister], buffer: io.BytesIO):
-    from .biz_functions import get_present_and_absent_members
+    from .biz_functions import get_present_and_absent_members_for_report
     doc = SimpleDocTemplate(
             buffer,
             pagesize=letter,
@@ -93,13 +97,17 @@ def generate_multiple_attendance_pdfs(attendance_registers: [AttendanceRegister]
         fontSize=12,
         leading=12,
     )
+    h_line = HRFlowable(width="90%", thickness=1, lineCap='round',
+                        color='lightgrey', spaceBefore=1, spaceAfter=1,
+                        hAlign='LEFT', vAlign='BOTTOM', dash=None)
 
     # Present Members
     for attendance_register in attendance_registers:
         title = f"<br/><br/>Attendance Register : {attendance_register.attendance_type} {attendance_register.date_taken.strftime('%d-%m-%Y')} <br/><br/>"
         document_title = Paragraph(title, style=title_style)
         flowables.append(document_title)
-        present_members, absent_members = get_present_and_absent_members(attendance_register)
+        flowables.append(h_line)
+        present_members, absent_members = get_present_and_absent_members_for_report(attendance_register)
         present_title = Paragraph(f'<br/><br/>[ Members Present ] <br/><br/>', style=heading_style)
         flowables.append(present_title)
         present_members_data = []
@@ -124,11 +132,18 @@ def generate_multiple_attendance_pdfs(attendance_registers: [AttendanceRegister]
         headings = ['Member Name', 'Member Status', 'Present/Absent']
         absent_members_data.append(headings)
         for member in absent_members:
-            absent_members_data.append([f"{member['first_name']} {member['surname']}", member['member_status'], 'Absent'])
+            absent_members_data.append([f'{member.first_name} {member.surname}', member.member_status, 'Absent'])
 
         tbl2 = Table(absent_members_data, colWidths=[table_width/3, table_width/3, table_width/3], hAlign='LEFT')
         tbl2.setStyle(table_style)
         flowables.append(tbl2)
+
+        # Summary Section
+        summary_title = Paragraph('<br/><br/><br/>Attendance Summary <br/><br/>', style=heading_style)
+        summary_body = Paragraph(f'<br/>Number Present : {len(present_members)}<br/><br/>Number Absent: {len(absent_members)}<br/>', style=heading_style)
+        flowables.append(summary_title)
+        flowables.append(h_line)
+        flowables.append(summary_body)
         flowables.append(PageBreak())
 
     doc.build(flowables)
@@ -138,7 +153,7 @@ def generate_multiple_attendance_pdfs(attendance_registers: [AttendanceRegister]
 
 
 def generate_membership_pdf(buffer: io.BytesIO):
-    from .biz_functions import get_church_members
+    from .biz_functions import get_church_members, get_church_members_summary
     doc = SimpleDocTemplate(
             buffer,
             pagesize=letter,
@@ -159,11 +174,17 @@ def generate_membership_pdf(buffer: io.BytesIO):
         fontSize=12,
         leading=12,
     )
+    h_line = HRFlowable(width="90%", thickness=1, lineCap='round',
+                        color='lightgrey', spaceBefore=1, spaceAfter=1,
+                        hAlign='LEFT', vAlign='BOTTOM', dash=None)
 
     church_members = get_church_members()
+    new_cvt_count, full_member_count = get_church_members_summary()
     title = f"<br/><br/>NECI Membership Register : {datetime.datetime.now().strftime('%d-%m-%Y')} <br/><br/>"
     document_title = Paragraph(title, style=title_style)
     flowables.append(document_title)
+    flowables.append(h_line)
+    flowables.append(Paragraph('<br/><br/>'))
 
     members_data = []
     headings = ['Member Name', 'Member Status', 'Mobile Number', "Profession"]
@@ -182,14 +203,22 @@ def generate_membership_pdf(buffer: io.BytesIO):
     flowables.append(tbl)
 
     # Summary
-    summary = f'Total Number: {len(church_members)}'
-    summary_title = Paragraph(f'<br/><br/>{summary}<br/><br/>', style=heading_style)
+    summary_total = Paragraph(f'<br/>Total: {len(church_members)}<br/>')
+    summary_new_converts = Paragraph(f'<br/>New Converts Count: {new_cvt_count}<br/>')
+    summary_full_count = Paragraph(f'<br/>Full Members Count: {full_member_count}<br/>')
+
+    summary_title = Paragraph(f'<br/><br/>Summary<br/><br/>', style=heading_style)
     flowables.append(summary_title)
+    flowables.append(h_line)
+    flowables.append(summary_total)
+    flowables.append(summary_new_converts)
+    flowables.append(summary_full_count)
 
     doc.build(flowables)
     pdf = buffer.getvalue()
     buffer.close()
     return pdf
+
 
 # Action for exporting registers to PDFs
 def attendance_register_view(modeladmin, request, queryset):

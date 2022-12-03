@@ -51,6 +51,9 @@ class ChurchMember(models.Model):
     def __str__(self):
         return f'{self.first_name.upper()} {self.middle_name.upper()} {self.surname.upper()}'
 
+    class Meta:
+        ordering = ['first_name', 'surname']
+
 
 class FollowUpEvent(models.Model):
     undertaken_by = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.DO_NOTHING)
@@ -61,6 +64,9 @@ class FollowUpEvent(models.Model):
     def __str__(self):
         return f'[ {self.follow_up_date}: {self.church_member.first_name} {self.church_member.surname} ]'
 
+    class Meta:
+        ordering = ["-follow_up_date"]
+
 
 class AttendanceRegister(models.Model):
     date_taken = models.DateField(default=datetime.date.today)
@@ -69,6 +75,8 @@ class AttendanceRegister(models.Model):
     def __str__(self):
         return f'[ {self.attendance_type} : {self.date_taken} ]'
 
+    class Meta:
+        ordering = ["-date_taken"]
 
 
 class MemberAttendance(models.Model):
@@ -80,3 +88,4 @@ class MemberAttendance(models.Model):
         if self.is_present:
             return f'[ {self.register} - {self.member} - Present ]'
         return f'[ {self.register} - {self.member} - Absent ]'
+
