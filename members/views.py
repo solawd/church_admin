@@ -3,9 +3,10 @@ from .models import AttendanceRegister
 from django.http import HttpResponse
 from .biz_functions import get_present_and_absent_members
 from .pdf_utils import generate_attendance_pdf
+from django.contrib.auth.decorators import login_required
 
 
-# Create your views here.
+@login_required
 def attendance_register_view(request, register_id):
     """
     Generate PDF for attendance register
