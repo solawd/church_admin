@@ -34,12 +34,12 @@ class CustomUser(AbstractUser):
 
 class ChurchMember(models.Model):
     first_name = models.CharField(max_length=100)
-    middle_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, null=True, blank=True)
     surname = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
-    address = models.CharField(max_length=1000)
-    profession = models.CharField(max_length=1000)
-    mobile_number = models.CharField(max_length=32)
+    address = models.CharField(max_length=1000, null=True, blank=True)
+    profession = models.CharField(max_length=1000, null=True, blank=True)
+    mobile_number = models.CharField(max_length=32, null=True, blank=True)
     member_status = models.CharField(max_length=15, choices=MEMBER_STATUSES, default="VISITOR")
 
     photo_width = models.PositiveIntegerField(null=True, blank=True)
