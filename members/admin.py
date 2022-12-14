@@ -34,7 +34,7 @@ class CustomChurchMemberAdmin(admin.ModelAdmin):
     model = ChurchMember
     list_display = ('first_name', 'middle_name', 'surname', 'member_status',)
     list_filter = ('first_name', 'middle_name', 'surname', 'member_status',)
-    search_fields = ('first_name', 'middle_name', 'surname',)
+    search_fields = ['first_name', 'middle_name', 'surname']
     ordering = ('first_name', 'middle_name', 'surname',)
 
 
@@ -128,6 +128,10 @@ class ChurchMemberModelAdmin(admin.ModelAdmin):
     inlines = (FollowUpAdminInline, )
     fields = ('first_name', 'middle_name', 'surname', 'date_of_birth', 'address', 'profession', 'mobile_number',
               'member_status', 'member_photo', 'invited_by')
+    list_display = ('first_name', 'middle_name', 'surname', 'member_status',)
+    list_filter = ('first_name', 'middle_name', 'surname', 'member_status',)
+    search_fields = ['first_name', 'middle_name', 'surname']
+    ordering = ('first_name', 'middle_name', 'surname',)
     actions = (export_members_to_pdf, )
 
 
