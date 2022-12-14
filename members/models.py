@@ -49,7 +49,7 @@ class ChurchMember(models.Model):
     invited_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return f'{self.first_name.upper()} {self.middle_name} {self.surname.upper()}'
+        return f'{self.first_name.upper()} {self.surname.upper()}'
 
     class Meta:
         ordering = ['first_name', 'surname']
