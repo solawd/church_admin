@@ -143,7 +143,7 @@ def generate_multiple_attendance_pdfs(attendance_registers: [AttendanceRegister]
         summary_title = Paragraph('<br/><br/><br/>Attendance Summary <br/><br/>', style=heading_style)
         summary_body = Paragraph(f"""<br/>Members Present : {len(present_members)}<br/><br/>
                                 Members Absent: {len(absent_members)}<br/><br/>
-                                Visitors Present: {visitors_count}""", style=heading_style)
+                                Visitors Present: {visitors_count} """, style=heading_style)
         flowables.append(summary_title)
         flowables.append(h_line)
         flowables.append(summary_body)
