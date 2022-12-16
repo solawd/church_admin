@@ -133,6 +133,7 @@ class ChurchMemberModelAdmin(admin.ModelAdmin):
     search_fields = ['first_name', 'middle_name', 'surname']
     ordering = ('first_name', 'middle_name', 'surname',)
     actions = (export_members_to_pdf, )
+    list_per_page = 50
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
