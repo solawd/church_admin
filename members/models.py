@@ -34,7 +34,9 @@ class CustomUser(AbstractUser):
 
 class ChurchGroup(models.Model):
     group_name = models.CharField(max_length=50)
+    group_leader = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
     group_description = models.CharField(max_length=200, null=True, blank=True)
+
 
     def __str__(self):
         return self.group_name
@@ -90,8 +92,29 @@ class AttendanceRegister(models.Model):
         ordering = ["-date_taken"]
 
 
+class GroupAttendanceRegister(models.Model):
+    church_group = models.ForeignKey(ChurchGroup,on_delete=models.DO_NOTHING)
+    date_taken = models.DateField(default=datetime.date.today)
+    attendance_type = models.CharField(max_length=48, choices=ATTENDANCE_TYPES, default='SUNDAY SERVICE')
+    is_already_synched = models.BooleanField(default=False, null=True, blank=True, editable=False)
+
+    def __str__(self):
+        return f'[ {self.attendance_type} : {self.date_taken} ]'
+
+    class Meta:
+        ordering = ["-date_taken"]
+
+
 class MemberAttendance(models.Model):
-    register = models.ForeignKey(AttendanceRegister, on_delete=models.DO_NOTHING, related_name='attendance_items')
+    register = models.ForeignKey(AttendanceRegister,
+                                 on_delete=models.DO_NOTHING,
+                                 related_name='attendance_items',
+                                 null=True, blank=True)
+
+    group_register = models.ForeignKey(GroupAttendanceRegister,
+                                       on_delete=models.DO_NOTHING,
+                                       related_name='attendance_items', null=True, blank=True)
+
     member = models.ForeignKey(ChurchMember, on_delete=models.DO_NOTHING)
     is_present = models.BooleanField(default=False)
 
