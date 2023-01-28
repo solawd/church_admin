@@ -53,6 +53,29 @@ class MemberAttendanceAdminInline(TabularInline):
         return formfield
 
 
+class ChurchMembersAdminInline(TabularInline):
+    extra = 0
+    model = ChurchMember
+    fields = ['first_name', 'surname', 'mobile_number', 'address']
+    readonly_fields = ['first_name', 'surname', 'mobile_number', 'address']
+
+    def formfield_for_dbfield(self, *args, **kwargs):
+        formfield = super().formfield_for_dbfield(*args, **kwargs)
+        if formfield:
+            formfield.widget.can_delete_related = False
+            formfield.widget.can_change_related = True
+            formfield.widget.can_add_related = True
+            formfield.widget.can_view_related = False
+
+        return formfield
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class FollowUpAdminInline(TabularInline):
     extra = 1
     model = FollowUpEvent
@@ -99,6 +122,12 @@ def export_members_to_pdf(modeladmin, request, queryset):
 export_members_to_pdf.short_description = 'Generate All Members PDF'
 
 
+@admin.register(ChurchGroup)
+class ChurchGroupModelAdmin(admin.ModelAdmin):
+    inlines = (ChurchMembersAdminInline,)
+    fields = ('group_name', 'group_description')
+
+
 @admin.register(AttendanceRegister)
 class AttendanceRegisterModelAdmin(admin.ModelAdmin):
     inlines = (MemberAttendanceAdminInline,)
@@ -127,7 +156,7 @@ class AttendanceRegisterModelAdmin(admin.ModelAdmin):
 class ChurchMemberModelAdmin(admin.ModelAdmin):
     inlines = (FollowUpAdminInline, )
     fields = ('first_name', 'middle_name', 'surname', 'date_of_birth', 'address', 'profession', 'mobile_number',
-              'member_status', 'member_photo', 'invited_by')
+              'member_status', 'church_group', 'member_photo', 'invited_by')
     list_display = ('first_name', 'middle_name', 'surname', 'member_status',)
     list_filter = ('first_name', 'middle_name', 'surname', 'member_status',)
     search_fields = ['first_name', 'middle_name', 'surname']
