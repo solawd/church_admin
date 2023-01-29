@@ -1,6 +1,6 @@
 import datetime
 import io
-from .models import AttendanceRegister
+from .models import AttendanceRegister, GroupAttendanceRegister
 from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import letter
@@ -245,4 +245,83 @@ def attendance_register_view(modeladmin, request, queryset):
 
     response.write(pdf)
     return response
+
+
+def generate_multiple_group_attendance_pdfs(group_attendance_registers: [GroupAttendanceRegister], buffer: io.BytesIO):
+    from .biz_functions import get_present_and_absent_members_for_report
+    doc = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            rightMargin=72,
+            leftMargin=72,
+            topMargin=30,
+            bottomMargin=72
+            )
+    table_width = doc.width
+    flowables = []
+    title_style = ParagraphStyle(
+        name='title',
+        fontSize=14,
+        leading=14,
+    )
+    heading_style = ParagraphStyle(
+        name='title',
+        fontSize=12,
+        leading=12,
+    )
+    h_line = HRFlowable(width="90%", thickness=1, lineCap='round',
+                        color='lightgrey', spaceBefore=1, spaceAfter=1,
+                        hAlign='LEFT', vAlign='BOTTOM', dash=None)
+
+    # Present Members
+    for attendance_register in group_attendance_registers:
+        title = f"<br/><br/>Group Attendance Register >> {attendance_register.attendance_type} >> {attendance_register.date_taken.strftime('%d-%m-%Y')} <br/><br/>"
+        title = title + f'{attendance_register.church_group.group_name}<br/><br/>'
+        document_title = Paragraph(title, style=title_style)
+        flowables.append(document_title)
+        flowables.append(h_line)
+        present_members, absent_members = get_present_and_absent_members_for_report(attendance_register)
+        present_title = Paragraph(f'<br/><br/>[ Members Present ] <br/><br/>', style=heading_style)
+        flowables.append(present_title)
+        present_members_data = []
+        headings = ['Member Name', 'Member Status', 'Present/Absent']
+        present_members_data.append(headings)
+        for member in present_members:
+            present_members_data.append([f'{member.first_name} {member.surname}', member.member_status, 'Present'])
+
+        table_style = TableStyle(
+            [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue)])
+        tbl = Table(present_members_data, colWidths=[table_width/3, table_width/3, table_width/3], hAlign='LEFT')
+        tbl.setStyle(table_style)
+        flowables.append(tbl)
+
+        # Absent Members
+        absent_title = Paragraph('<br/><br/>[ Members Absent ]<br/><br/>', style=heading_style)
+        flowables.append(absent_title)
+        absent_members_data = []
+        headings = ['Member Name', 'Member Status', 'Present/Absent']
+        absent_members_data.append(headings)
+        for member in absent_members:
+            absent_members_data.append([f'{member.first_name} {member.surname}', member.member_status, 'Absent'])
+
+        tbl2 = Table(absent_members_data, colWidths=[table_width/3, table_width/3, table_width/3], hAlign='LEFT')
+        tbl2.setStyle(table_style)
+        flowables.append(tbl2)
+
+        # Summary Section
+        summary_title = Paragraph('<br/><br/><br/>Attendance Summary <br/><br/>', style=heading_style)
+        summary_body = Paragraph(f"""<br/>Members Present : {len(present_members)}<br/><br/>
+                                Members Absent: {len(absent_members)}<br/><br/>""", style=heading_style)
+        flowables.append(summary_title)
+        flowables.append(h_line)
+        flowables.append(summary_body)
+        flowables.append(PageBreak())
+
+    doc.build(flowables)
+    pdf = buffer.getvalue()
+    buffer.close()
+    return pdf
 

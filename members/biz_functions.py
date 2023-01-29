@@ -42,6 +42,3 @@ def get_church_members_summary():
 
 
 
-
-
-

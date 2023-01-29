@@ -21,3 +21,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/pdf/<int:register_id>', member_views.attendance_register_view, name='register_pdf'),
 ]
+

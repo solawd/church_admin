@@ -34,12 +34,15 @@ class CustomUser(AbstractUser):
 
 class ChurchGroup(models.Model):
     group_name = models.CharField(max_length=50)
-    group_leader = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
+    group_leader = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, null=True, blank=True)
     group_description = models.CharField(max_length=200, null=True, blank=True)
-
 
     def __str__(self):
         return self.group_name
+
+    @property
+    def register_url(self):
+        return f'/admin/members/churchgroup/{self.id}/group_register/'
 
 
 class ChurchMember(models.Model):
@@ -99,7 +102,7 @@ class GroupAttendanceRegister(models.Model):
     is_already_synched = models.BooleanField(default=False, null=True, blank=True, editable=False)
 
     def __str__(self):
-        return f'[ {self.attendance_type} : {self.date_taken} ]'
+        return f'[{self.church_group.group_name} >> {self.attendance_type} >> {self.date_taken} ]'
 
     class Meta:
         ordering = ["-date_taken"]
