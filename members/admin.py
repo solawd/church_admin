@@ -29,10 +29,20 @@ class GroupRegisterView(PermissionRequiredMixin, DetailView):
         }
 
 
+
+def make_users_superusers(modeladmin, request, queryset):
+    queryset.update(is_superuser=True, is_staff=True)
+    messages.info(request, 'Users converted to super users succesfully')
+
+
+make_users_superusers.short_description = 'Make Users Superusers'
+
+
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
+    actions = (make_users_superusers,)
     list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_active',)
     list_filter = ('email', 'first_name', 'last_name', 'is_staff', 'is_active',)
     fieldsets = (
@@ -58,8 +68,9 @@ class CustomChurchMemberAdmin(admin.ModelAdmin):
 
 
 class MemberAttendanceAdminInline(TabularInline):
-    extra = 1
+    extra = 0
     model = MemberAttendance
+    fields = ('member', 'is_present')
 
     def formfield_for_dbfield(self, *args, **kwargs):
         formfield = super().formfield_for_dbfield(*args, **kwargs)
